@@ -7,7 +7,9 @@ export const config = {
 
   CLIENT_URL: process.env.CLIENT_URL || "http://localhost:3000",
 
-  MONGO_URI: process.env.MONGO_URI || "mongodb://localhost:27017/esports",
+  MONGO_URI:
+    process.env.MONGO_URI ||
+    "mongodb+srv://pn3147399:5cdLNld3ODzvJUqv@cluster0.7viug.mongodb.net/apnasquad",
 
   REDIS_URL: process.env.UPSTASH_REDIS_REST_URL,
   REDIS_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,

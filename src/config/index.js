@@ -34,5 +34,5 @@ export const config = {
   // cashfree
   CASHFREE_APP_ID: process.env.CASHFREE_APP_ID,
   CASHFREE_SECRET_KEY: process.env.CASHFREE_SECRET_KEY,
-  CASHFREE_WEBHOOK_URL: "https://0c9002998829.ngrok-free.app", // process.env.CASHFREE_URL,
+  CASHFREE_WEBHOOK_URL: process.env.CASHFREE_URL,
 };

@@ -33,7 +33,7 @@ app.set("trust proxy", 1);
 
 app.use(
   session({
-    secret: config.SECRET,
+    secret: "1npajz3rpz776w9d7tw8",
     resave: false,
     saveUninitialized: false,
     cookie: {

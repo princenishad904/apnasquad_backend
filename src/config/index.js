@@ -14,7 +14,7 @@ export const config = {
   REDIS_URL: process.env.UPSTASH_REDIS_REST_URL,
   REDIS_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
 
-  SECRET: process.env.SECRET || "bvnchddihw3asdjw3",
+  SECRET: process.env.SECRET,
 
   SENDER_EMAIL: process.env.EMAIL_SEND_USER,
   EMAIL_PASSWORD: process.env.EMAIL_PASSWORD,

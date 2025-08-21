@@ -7,6 +7,7 @@ export const config = {
 
   CLIENT_URL: "https://www.team04.site",
 
+  CASHFREE_ORDERS_URL: process.env.CASHFREE_ORDERS_URL,
   MONGO_URI:
     process.env.MONGO_URI ||
     "mongodb+srv://pn3147399:5cdLNld3ODzvJUqv@cluster0.7viug.mongodb.net/apnasquad",

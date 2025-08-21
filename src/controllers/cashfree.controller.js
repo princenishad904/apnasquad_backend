@@ -9,7 +9,7 @@ import Order from "../models/order.model.js";
 import axios from "axios";
 import Transaction from "../models/transaction.model.js";
 
-const CASHFREE_ORDERS_URL = "https://sandbox.cashfree.com/pg/orders";
+const CASHFREE_ORDERS_URL = config.CASHFREE_ORDERS_URL;
 
 export const createOrder = asyncHandler(async (req, res) => {
   const { amount, _id, email, phone } = req.body;

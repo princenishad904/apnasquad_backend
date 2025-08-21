@@ -217,17 +217,18 @@ export const login = asyncHandler(async (req, res) => {
   const accessTokenOptions = {
     httpOnly: true,
     secure: true,
-    sameSite: "none",
-    maxAge: 2 * 24 * 60 * 60 * 1000, // 2 minutes in milliseconds
+    sameSite: "None",
+    maxAge: 2 * 24 * 60 * 60 * 1000,
   };
 
   // Refresh Token ke liye ek long expiry time (e.g., 7 days)
   const refreshTokenOptions = {
     httpOnly: true,
     secure: true,
-    sameSite: "none",
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+    sameSite: "None", // yahan "none" ki jagah "None" karna hai
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   };
+
   res
     .status(200)
     .cookie("accessToken", accessToken, accessTokenOptions)

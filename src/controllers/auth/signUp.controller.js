@@ -217,6 +217,7 @@ export const login = asyncHandler(async (req, res) => {
   const accessTokenOptions = {
     httpOnly: true,
     secure: true,
+    sameSite: "none",
     maxAge: 2 * 24 * 60 * 60 * 1000, // 2 minutes in milliseconds
   };
 
@@ -224,6 +225,7 @@ export const login = asyncHandler(async (req, res) => {
   const refreshTokenOptions = {
     httpOnly: true,
     secure: true,
+    sameSite: "none",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
   };
   res

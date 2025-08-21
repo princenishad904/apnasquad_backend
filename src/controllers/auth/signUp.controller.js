@@ -216,14 +216,14 @@ export const login = asyncHandler(async (req, res) => {
   // Access Token ke liye ek short expiry time (e.g., 15 minutes)
   const accessTokenOptions = {
     httpOnly: true,
-    secure: process.env.NODE !== "development",
+    secure: true,
     maxAge: 2 * 24 * 60 * 60 * 1000, // 2 minutes in milliseconds
   };
 
   // Refresh Token ke liye ek long expiry time (e.g., 7 days)
   const refreshTokenOptions = {
     httpOnly: true,
-    secure: process.env.NODE !== "development",
+    secure: true,
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
   };
   res

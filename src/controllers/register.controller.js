@@ -110,7 +110,6 @@ export const registrationInTournament = asyncHandler(async (req, res) => {
 
     return apiResponse(res, 200, {}, "Tournament joined successfully");
   } catch (error) {
-    console.error("An error occurred during the registration process:", error);
     throw new apiError(500, "Registration failed due to an error.");
   }
 });

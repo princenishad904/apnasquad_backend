@@ -16,7 +16,7 @@ export const createTournament = asyncHandler(async (req, res) => {
     map,
     prizeDistribution,
   } = req.body;
-  console.log(prizeDistribution);
+
   const requiredFields = {
     title,
     mode,
@@ -63,7 +63,7 @@ export const createTournament = asyncHandler(async (req, res) => {
     (sum, rank) => sum + Number(rank.prize),
     0
   );
-  console.log(totalPrizeFromDistribution, prizePool);
+
   if (totalPrizeFromDistribution !== Number(prizePool)) {
     throw new apiError(
       400,

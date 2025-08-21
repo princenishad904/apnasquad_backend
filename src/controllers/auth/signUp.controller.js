@@ -97,7 +97,6 @@ export const signUp = asyncHandler(async (req, res) => {
       "signUpOtp"
     );
   } catch (emailError) {
-    console.error("Email sending failed:", emailError);
     await redisClient.del(`otp:${email}`);
     throw new apiError(500, "Failed to send OTP. Please try again.");
   }
@@ -176,7 +175,6 @@ export const verifyAndSignUp = asyncHandler(async (req, res) => {
 
     return apiResponse(res, 201, userResponse, "Account created successfully!");
   } catch (dbError) {
-    console.error("Database error:", dbError);
     throw new apiError(500, "Failed to create account. Please try again.");
   }
 });

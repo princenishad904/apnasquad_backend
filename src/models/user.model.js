@@ -108,10 +108,6 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.generateAccessAndRefreshTokens = async function () {
-  console.log(
-    "TOKEN IS BEING SIGNED WITH THIS SECRET:",
-    config.ACCESS_TOKEN_SECRET
-  );
   const accessToken = jwt.sign(
     {
       _id: this._id,

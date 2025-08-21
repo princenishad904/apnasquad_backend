@@ -17,14 +17,12 @@ import tournamentRoute from "./routes/tournament.route.js";
 import paymentRoutes from "./routes/payment.route.js";
 import adminRoute from "./routes/admin.route.js";
 import transactionRoute from "./routes/transactions.route.js";
-
-import { redisClient } from "./lib/redis.js";
 const app = express();
 app.use(helmet());
 
 app.use(
   cors({
-    origin: "https://apnasquad.vercel.app",
+    origin: ["https://apnasquad.vercel.app"],
     credentials: true,
   })
 );
@@ -33,7 +31,7 @@ app.set("trust proxy", 1);
 
 app.use(
   session({
-    secret: "1npajz3rpz776w9d7tw8",
+    secret: config.SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {

@@ -30,20 +30,6 @@ app.use(
 app.set("trust proxy", 1);
 
 app.use(
-  session({
-    secret: config.SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      maxAge: 2 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      sameSite: "None", // 'none' ko 'None' se badle
-      secure: true,
-    },
-  })
-);
-
-app.use(
   rateLimit({
     windowMs: 1000 * 60 * 60,
     max: 400,

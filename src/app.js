@@ -22,8 +22,8 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: ["https://apnasquad.vercel.app"],
-    credentials: true,
+    origin: ["https://apnasquad.vercel.app"], // frontend domain
+    credentials: true, // zaroori hai
   })
 );
 
@@ -37,7 +37,7 @@ app.use(
     cookie: {
       maxAge: 1000 * 60 * 2,
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: "none",
       secure: true,
     },
   })

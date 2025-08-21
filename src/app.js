@@ -6,7 +6,6 @@ import errorHandler from "./middlewares/errorHandler.js";
 import rateLimit from "express-rate-limit";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
-import session from "express-session";
 import compression from "compression";
 import bodyParser from "body-parser";
 import { apiResponse } from "./utils/apiResponse.js";
@@ -29,6 +28,10 @@ app.use(
 
 app.set("trust proxy", 1);
 
+app.use("/api/v1/payment", paymentRoutes);
+
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 app.use(
   rateLimit({
     windowMs: 1000 * 60 * 60,
@@ -37,11 +40,6 @@ app.use(
     legacyHeaders: false,
   })
 );
-
-app.use("/api/v1/payment", paymentRoutes);
-
-app.use(express.json({ limit: "1mb" }));
-app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
 app.use(cookieParser());
 // Agar tum proxy/ngrok/Cloudflare use kar rahe ho to ye zaroor lagao

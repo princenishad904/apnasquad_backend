@@ -213,34 +213,26 @@ export const login = asyncHandler(async (req, res) => {
     "-password -refreshToken"
   );
 
-  // Access Token ke liye ek short expiry time (e.g., 15 minutes)
-  const accessTokenOptions = {
-    httpOnly: true,
-    secure: true,
-    sameSite: "None",
-    maxAge: 2 * 24 * 60 * 60 * 1000,
-  };
-
-  // Refresh Token ke liye ek long expiry time (e.g., 7 days)
-  const refreshTokenOptions = {
-    httpOnly: true,
-    secure: true,
-    sameSite: "None", // yahan "none" ki jagah "None" karna hai
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  };
-
   res
     .status(200)
-    .cookie("accessToken", accessToken, accessTokenOptions)
-    .cookie("refreshToken", refreshToken, refreshTokenOptions);
+    .cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      maxAge: 15 * 60 * 1000, // short expiry for access token
+    })
+    .cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
   return apiResponse(
     res,
     200,
     {
       user: loggedInUser,
-      accessToken,
-      refreshToken,
     },
     "login successfull"
   );

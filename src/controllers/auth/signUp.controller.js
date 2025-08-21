@@ -69,7 +69,7 @@ export const signUp = asyncHandler(async (req, res) => {
     }
   }
 
-  const otp = generateOTP(6);
+  const otp = generateOTP(4);
   const otpExpiry = Date.now() + 600000; // 10 minutes expiry
 
   const newUser = {
@@ -96,7 +96,8 @@ export const signUp = asyncHandler(async (req, res) => {
       { name: name.trim(), otp },
       "signUpOtp"
     );
-  } catch (emailError) {
+  } catch (error) {
+    console.log(error);
     await redisClient.del(`otp:${email}`);
     throw new apiError(500, "Failed to send OTP. Please try again.");
   }
@@ -219,15 +220,16 @@ export const login = asyncHandler(async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-      domain: ".team04.site", // allow team04.site & www.team04.site both
-      maxAge: 15 * 60 * 1000,
+      // domain: ".team04.site", // allow team04.site & www.team04.site both
+      maxAge: 30 * 60 * 60 * 1000,
     })
     .cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-      domain: ".team04.site", // allow team04.site & www.team04.site both
-      maxAge: 15 * 60 * 1000,
+      // domain: ".team04.site", // allow team04.site & www.team04.site both
+
+      maxAge: 60 * 60 * 60 * 1000,
     });
 
   return apiResponse(
@@ -266,4 +268,156 @@ export const logout = asyncHandler(async (req, res) => {
     .clearCookie("refreshToken", options);
 
   return apiResponse(res, 200, {}, "User logged out successfully");
+});
+
+export const sendResetPasswordOtp = asyncHandler(async (req, res) => {
+  // 1. Request body se email extract karein.
+  const { email } = req.body;
+
+  // 2. Email validation.
+  if (!email) {
+    throw new apiError(400, "Please enter email");
+  }
+
+  const isExist = await User.findOne({ email }).select("email").lean();
+  if (!isExist) {
+    // Corrected: Status code added, aur better error message.
+    throw new apiError(
+      404,
+      "User not found with this email. Please enter a registered email."
+    );
+  }
+
+  const otp = generateOTP(4);
+  const otpKey = `otp:${email}`;
+
+  // 5. Redis mein OTP store karein 5 minutes (300 seconds) ke liye.
+  await redisClient.set(
+    otpKey,
+    JSON.stringify({
+      email,
+      otp,
+      isVerified: false,
+    }),
+    "EX", // EX ka matlab hai seconds mein expiration time
+    300
+  );
+
+  // 6. User ko OTP email karein.
+  try {
+    await sendEmail(
+      isExist.email,
+      "Reset your apnasquad password",
+      { otp: otp },
+      "resetPassword"
+    );
+  } catch (error) {
+    // Agar email bhejte waqt koi error aaye toh
+    throw new apiError(500, `Failed to send OTP email: ${error.message}`);
+  }
+
+  // 7. Client ko success response bhejein.
+  return apiResponse(res, 200, {}, "OTP for password reset sent successfully.");
+});
+
+export const verifyResetPasswordOtp = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email) {
+    throw new apiError(400, "Email is missing. Please try again.");
+  }
+  if (!otp) {
+    throw new apiError(400, "Please enter the OTP.");
+  }
+
+  const otpKey = `otp:${email}`;
+
+  // 3. Redis se OTP data fetch karein.
+  let userData = await redisClient.get(otpKey);
+
+  // 4. Check karein ki OTP exist karta hai ya expire ho gaya hai.
+  if (!userData) {
+    throw new apiError(400, "OTP has expired. Please send again.");
+  }
+
+  // 5. JSON data ko parse karein.
+  userData = JSON.parse(userData);
+
+  // 6. OTP match karein.
+  if (otp !== userData.otp) {
+    throw new apiError(400, "Invalid OTP. Please check and try again.");
+  }
+
+  userData.isVerified = true;
+
+  await redisClient.set(otpKey, JSON.stringify(userData), "EX", 600);
+
+  return apiResponse(
+    res,
+    200,
+    {},
+    "OTP verified successfully. You can now reset your password."
+  );
+});
+
+export const resetPassword = asyncHandler(async (req, res) => {
+  // 1. Request body se email aur naya password extract karein.
+  const { email, password } = req.body;
+
+  // 2. Input validation.
+  if (!email) {
+    throw new apiError(400, "Please enter email");
+  }
+  if (!password) {
+    throw new apiError(400, "Please enter a new password");
+  }
+
+  const otpKey = `otp:${email}`;
+
+  // 3. Redis se OTP data fetch karein.
+  let userData = await redisClient.get(otpKey);
+
+  // 4. Check karein ki OTP session exist karta hai ya nahi.
+  if (!userData) {
+    throw new apiError(
+      400,
+      "OTP session expired or invalid. Please try the reset flow again."
+    );
+  }
+
+  userData = JSON.parse(userData);
+
+  // 5. Check karein ki OTP verify ho chuka hai ya nahi.
+  if (!userData.isVerified) {
+    throw new apiError(400, "OTP not verified. Please verify the OTP first.");
+  }
+
+  // 6. Database se user document find karein.
+  // .lean() remove kiya hai taaki document save ho sake.
+  const user = await User.findOne({ email });
+
+  // Agar user nahi mila to error dein
+  if (!user) {
+    throw new apiError(404, "User not found.");
+  }
+
+  // 7. Sabse important step: Naye password ko seedha hash karein
+  // Uske baad user object mein set karein.
+
+  user.password = password;
+
+  // 8. Hashed password ko database mein save karein.
+  // Ab save() call karne par password update ho jayega.
+  await user.save();
+
+  // 9. Security Fix: Redis se OTP key delete karein taaki dobara use na ho sake.
+  await redisClient.del(otpKey);
+
+  // 10. Success response bhejein.
+  return apiResponse(
+    res,
+    200,
+    {},
+    "Password has been reset successfully. yahhooo"
+  );
 });

@@ -3,8 +3,11 @@ import {
   getLoggedInUser,
   login,
   logout,
+  resetPassword,
+  sendResetPasswordOtp,
   signUp,
   verifyAndSignUp,
+  verifyResetPasswordOtp,
 } from "../controllers/auth/signUp.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -23,5 +26,9 @@ authRoutes.route("/login").post(login);
 authRoutes.route("/me").get(verifyJWT, getLoggedInUser);
 
 authRoutes.route("/logout").post(verifyJWT, logout);
+
+authRoutes.route("/request-otp").post(sendResetPasswordOtp);
+authRoutes.route("/verify-otp-for-reset-password").post(verifyResetPasswordOtp);
+authRoutes.route("/reset-password").post(resetPassword);
 
 export default authRoutes;

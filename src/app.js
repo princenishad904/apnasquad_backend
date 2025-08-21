@@ -21,8 +21,8 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: ["https://www.team04.site"],
-    credentials: true, // zaroori hai
+    origin: ["https://team04.site", "https://www.team04.site"],
+    credentials: true,
   })
 );
 

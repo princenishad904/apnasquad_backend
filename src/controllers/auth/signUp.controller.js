@@ -219,13 +219,15 @@ export const login = asyncHandler(async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-      maxAge: 15 * 60 * 1000, // short expiry for access token
+      domain: ".team04.site", // allow team04.site & www.team04.site both
+      maxAge: 15 * 60 * 1000,
     })
     .cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      domain: ".team04.site", // allow team04.site & www.team04.site both
+      maxAge: 15 * 60 * 1000,
     });
 
   return apiResponse(

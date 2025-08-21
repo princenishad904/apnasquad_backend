@@ -5,7 +5,7 @@ export const config = {
   PORT: process.env.PORT || 5000,
   NODE: process.env.NODE,
 
-  CLIENT_URL: process.env.CLIENT_URL,
+  CLIENT_URL: "https://www.team04.site",
 
   MONGO_URI:
     process.env.MONGO_URI ||

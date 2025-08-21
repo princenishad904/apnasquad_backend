@@ -11,7 +11,7 @@ export const config = {
     process.env.MONGO_URI ||
     "mongodb+srv://pn3147399:5cdLNld3ODzvJUqv@cluster0.7viug.mongodb.net/apnasquad",
 
-  REDIS_URL: process.env.UPSTASH_REDIS_REST_URL,
+  UPSTASH_REDIS_CONN: process.env.UPSTASH_REDIS_CONN,
   REDIS_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
 
   SECRET: process.env.SECRET,

@@ -50,7 +50,7 @@ app.use("/api/v1/auth", authRoutes);
 // user routes
 app.use("/api/v1/user", userRoutes);
 
-app.get("/api/v1/health", verifyJWT, (req, res) => {
+app.get("/api/v1/health", (req, res) => {
   return apiResponse(res, 200, {}, "everything is fine");
 });
 

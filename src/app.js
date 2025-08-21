@@ -21,7 +21,7 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: ["https://apnasquad.vercel.app"], // frontend domain
+    origin: ["https://team04.site", "https://www.team04.site"],
     credentials: true, // zaroori hai
   })
 );

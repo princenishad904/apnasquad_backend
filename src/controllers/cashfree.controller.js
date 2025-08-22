@@ -10,6 +10,7 @@ import axios from "axios";
 import Transaction from "../models/transaction.model.js";
 
 const CASHFREE_ORDERS_URL = config.CASHFREE_ORDERS_URL;
+// const CASHFREE_ORDERS_URL = "https://sandbox.cashfree.com/pg/orders";
 
 export const createOrder = asyncHandler(async (req, res) => {
   const { amount, _id, email, phone } = req.body;
@@ -74,11 +75,11 @@ export const webhookVerification = asyncHandler(async (req, res) => {
     return res.status(400).send("Signature or timestamp header missing");
   }
 
-  // Signature Verification with timestamp
+  // Signature Verification
   try {
     const expectedSig = crypto
       .createHmac("sha256", webhookSecret)
-      .update(timestamp + rawBody) // timestamp + rawBody
+      .update(timestamp + rawBody)
       .digest("base64");
 
     if (expectedSig !== sigHeader) {
@@ -95,53 +96,49 @@ export const webhookVerification = asyncHandler(async (req, res) => {
     return res.status(400).send("Invalid JSON payload");
   }
 
-  const orderId = payload.data?.order?.order_id; // Optional chaining '?' use karein
+  const orderId = payload.data?.order?.order_id;
   const paymentStatus = payload.data?.payment?.payment_status;
   const amount = payload.data?.payment?.payment_amount;
   const failed_message = payload.data?.error_details?.error_description;
 
+  // --- Code me yahan changes kiye gaye hain ---
   if (paymentStatus === "SUCCESS") {
-    // Pehle check karo ki order already paid to nahi
-    const order = await Order.findOne({ orderId });
-    if (!order) {
-      return res.status(404).send("Order not found");
+    // Atomically find the order and update its status only if it's not already 'PAID'
+    const updatedOrder = await Order.findOneAndUpdate(
+      { orderId, status: { $ne: "PAID" } }, // Condition: orderId matches AND status is NOT 'PAID'
+      { $set: { status: "PAID" } }, // Action: Set status to 'PAID'
+      { new: true } // Option: Return the updated document
+    );
+
+    if (!updatedOrder) {
+      // If updatedOrder is null, it means the order was either not found or was
+      // already processed. In a webhook, it's safer to assume the latter.
+      console.log("Webhook already processed or order not found for:", orderId);
+      return res.status(200).send("Already processed or not found");
     }
 
-    if (order.status === "PAID") {
-      return res.status(200).send("Already processed");
-    }
-
-    // Order ko paid mark karo
-    await Order.updateOne({ orderId }, { $set: { status: "PAID" } });
-
-    // User balance increment karo
-    await User.findByIdAndUpdate(order.userId, {
+    // Since the update was successful (first time processing), proceed with other updates.
+    await User.findByIdAndUpdate(updatedOrder.userId, {
       $inc: { balance: Number(amount) },
     });
 
-    // Transaction status update karo
     await Transaction.updateOne({ orderId }, { $set: { status: "success" } });
   }
 
   if (paymentStatus === "FAILED") {
-    // Pehle check karo ki order already paid to nahi
-    const order = await Order.findOne({ orderId });
-    if (!order) {
-      return res.status(404).send("Order not found");
-    }
-
-    if (order.status === "FAILED") {
-      return res.status(200).send("Already processed");
-    }
-
-    // Order ko paid mark karo
-    await Order.updateOne({ orderId }, { $set: { status: "FAILED" } });
-
-    // Transaction status update karo
-    await Transaction.updateOne(
-      { orderId },
-      { $set: { status: "failed" }, description: failed_message }
+    // Failed case mein bhi atomic update use kar sakte hain for consistency
+    const updatedOrder = await Order.findOneAndUpdate(
+      { orderId, status: { $ne: "FAILED" } },
+      { $set: { status: "FAILED" } },
+      { new: true }
     );
+
+    if (updatedOrder) {
+      await Transaction.updateOne(
+        { orderId },
+        { $set: { status: "failed" }, description: failed_message }
+      );
+    }
   }
 
   return res.status(200).send("OK");

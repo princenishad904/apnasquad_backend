@@ -9,60 +9,78 @@ import Order from "../models/order.model.js";
 import axios from "axios";
 import Transaction from "../models/transaction.model.js";
 
-const CASHFREE_ORDERS_URL = config.CASHFREE_ORDERS_URL;
-// const CASHFREE_ORDERS_URL = "https://sandbox.cashfree.com/pg/orders";
-
 export const createOrder = asyncHandler(async (req, res) => {
   const { amount, _id, email, phone } = req.body;
 
   if (!_id) throw new apiError(400, "user not authorized please login");
 
-  const order_id = `order_${crypto.randomBytes(10).toString("hex")}`;
-  const transaction_id = `${crypto.randomBytes(10).toString("hex")}`;
-  const payload = {
-    order_currency: "INR",
-    order_amount: amount,
-    order_id: order_id,
-    customer_details: {
-      customer_id: _id,
-      customer_phone: phone,
-      customer_email: email,
-      customer_transaction_id: transaction_id,
-    },
-    order_meta: {
-      // notify_url: notifyUrl,
-      return_url: `${config.CLIENT_URL}/payment/result?order_id=${order_id}`,
-    },
-  };
+  if (!phone || !email) {
+    throw new apiError(400, "Phone and email are required");
+  }
 
-  const headers = {
-    "x-api-version": "2025-01-01",
-    "x-client-id": config.CASHFREE_APP_ID,
-    "x-client-secret": config.CASHFREE_SECRET_KEY,
-    "Content-Type": "application/json",
-  };
+  if (!amount || amount <= 0) {
+    throw new apiError(400, "Invalid amount");
+  }
+  try {
+    const order_id = `order_${crypto.randomBytes(10).toString("hex")}`;
 
-  const response = await axios.post(CASHFREE_ORDERS_URL, payload, {
-    headers,
-  });
+    const payload = {
+      order_currency: "INR",
+      order_amount: amount,
+      order_id: order_id,
 
-  if (!response) throw new apiError(400, "Failed to created order");
+      customer_details: {
+        customer_id: _id,
+        customer_name: "Customer Name", // Ye field add karo
+        customer_phone: phone,
+        customer_email: email,
+      },
+      order_meta: {
+        return_url: `${config.CLIENT_URL}/payment/result?order_id=${order_id}`,
+      },
+    };
 
-  await Order.create({
-    orderId: order_id,
-    userId: _id,
-    amount,
-  });
+    const headers = {
+      "x-api-version": "2025-01-01",
+      "x-client-id": config.CASHFREE_APP_ID,
+      "x-client-secret": config.CASHFREE_SECRET_KEY,
+      "Content-Type": "application/json",
+      Accept: "application/json", // Ye add karo
+    };
 
-  await Transaction.create({
-    user: _id,
-    type: "deposit",
-    amount,
-    transactionId: transaction_id,
-    orderId: order_id,
-  });
+    const response = await axios.post(
+      // "https://sandbox.cashfree.com/pg/orders",
+      "https://api.cashfree.com/pg/orders",
+      payload,
+      {
+        headers,
+      }
+    );
 
-  return apiResponse(res, 200, response.data, "Order created successfully");
+    if (!response) throw new apiError(400, "Failed to created order");
+
+    await Order.create({
+      orderId: order_id,
+      userId: _id,
+      amount,
+    });
+
+    await Transaction.create({
+      user: _id,
+      type: "deposit",
+      amount,
+      transactionId: order_id,
+      orderId: order_id,
+    });
+
+    return apiResponse(res, 200, response.data, "Order created successfully");
+  } catch (error) {
+    console.log("Full error:", error.response?.data);
+    // Specific error message return karo
+    const errorMsg =
+      error.response?.data?.message || error.message || "Order creation failed";
+    throw new apiError(400, errorMsg);
+  }
 });
 
 export const webhookVerification = asyncHandler(async (req, res) => {
@@ -79,7 +97,7 @@ export const webhookVerification = asyncHandler(async (req, res) => {
   try {
     const expectedSig = crypto
       .createHmac("sha256", webhookSecret)
-      .update(timestamp + rawBody)
+      .update(timestamp + rawBody.toString())
       .digest("base64");
 
     if (expectedSig !== sigHeader) {

@@ -3,19 +3,17 @@ dotenv.config();
 
 export const config = {
   PORT: process.env.PORT || 5000,
+
   NODE: process.env.NODE,
 
-  CLIENT_URL: "https://www.team04.site",
+  CLIENT_URL: process.env.FRONTEND_BASE_URL,
 
-  CASHFREE_ORDERS_URL: process.env.CASHFREE_ORDERS_URL,
   MONGO_URI:
     process.env.MONGO_URI ||
     "mongodb+srv://pn3147399:5cdLNld3ODzvJUqv@cluster0.7viug.mongodb.net/apnasquad",
 
   UPSTASH_REDIS_CONN: process.env.UPSTASH_REDIS_CONN,
   REDIS_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
-
-  SECRET: process.env.SECRET,
 
   SENDER_EMAIL: process.env.EMAIL_SEND_USER,
   EMAIL_PASSWORD: process.env.EMAIL_PASSWORD,
@@ -26,6 +24,7 @@ export const config = {
   REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
   REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY,
 
+  SECRET: process.env.SECRET,
   // image kit
 
   IMAGEKIT_PUBLIC_KEY: process.env.IMAGEKIT_PUBLIC_KEY,
@@ -35,5 +34,6 @@ export const config = {
   // cashfree
   CASHFREE_APP_ID: process.env.CASHFREE_APP_ID,
   CASHFREE_SECRET_KEY: process.env.CASHFREE_SECRET_KEY,
-  CASHFREE_WEBHOOK_URL: process.env.CASHFREE_URL,
+  CASHFREE_WEBHOOK_URL: process.env.CASHFREE_WEBHOOK_URL,
+  CASHFREE_ORDERS_URL: process.env.CASHFREE_ORDERS_URL,
 };

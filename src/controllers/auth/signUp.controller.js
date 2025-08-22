@@ -228,7 +228,6 @@ export const login = asyncHandler(async (req, res) => {
       secure: true,
       sameSite: "None",
       domain: ".team04.site", // allow team04.site & www.team04.site both
-
       maxAge: 60 * 60 * 60 * 1000,
     });
 
@@ -248,7 +247,7 @@ export const getLoggedInUser = asyncHandler(async (req, res) => {
 });
 
 export const logout = asyncHandler(async (req, res) => {
-  const user = User.findByIdAndUpdate(
+  const user = await User.findByIdAndUpdate(
     req.user._id,
     { $set: { refreshToken: "" } },
     {
@@ -259,7 +258,8 @@ export const logout = asyncHandler(async (req, res) => {
   // Step 2: Clear cookies from the browser
   const options = {
     httpOnly: true,
-    secure: process.env.NODE_ENV !== "development",
+    secure: true,
+    sameSite: "None",
   };
 
   res

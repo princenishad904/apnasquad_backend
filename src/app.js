@@ -21,9 +21,13 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: ["https://team04.site", "https://www.team04.site"],
+    origin: [
+      "https://team04.site",
+      "https://www.team04.site",
+      "http://localhost:3000",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    credentials: true, // 👈 cookies ke liye zaroori
+    credentials: true,
   })
 );
 

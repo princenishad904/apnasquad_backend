@@ -98,7 +98,7 @@ export const registrationInTournament = asyncHandler(async (req, res) => {
     // 8. Create a transaction record for history
     await Transaction.create({
       user: userId,
-      type: "join",
+      type: "game",
       amount: entryFee,
       status: "success",
       tournament: tournament._id,

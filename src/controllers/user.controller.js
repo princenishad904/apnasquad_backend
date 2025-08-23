@@ -6,7 +6,8 @@ import {
   deleteFromImageKit,
   uploadToImageKit,
 } from "../services/imagekitService.js";
-
+import mongoose from "mongoose";
+import Transaction from "../models/transaction.model.js";
 export const updateUserPrfile = asyncHandler(async (req, res) => {
   const fieldsToUpdate = req.body;
 
@@ -57,4 +58,61 @@ export const updateUserPrfile = asyncHandler(async (req, res) => {
   }
 
   return apiResponse(res, 200, updatedUser, "Profile updated successfully");
+});
+
+export const getMyTransactions = asyncHandler(async (req, res) => {
+  const user = req.user;
+
+  if (!user) {
+    throw new apiError(400, "Invalid User, login again");
+  }
+
+  // Extract query parameters for pagination and filtering
+  const { page = 1, limit = 10, status, type } = req.query;
+
+  const query = {
+    user: user._id, // Filter transactions for the logged-in user
+  };
+
+  if (status) {
+    query.status = status;
+  }
+  if (type) {
+    query.type = type;
+  }
+
+  // Convert page and limit to numbers
+  const pageNumber = parseInt(page);
+  const limitNumber = parseInt(limit);
+
+  // Calculate the number of documents to skip
+  const skip = (pageNumber - 1) * limitNumber;
+
+  // Fetch transactions with pagination and query filters
+  const transactions = await Transaction.find(query)
+    .sort({ createdAt: -1 }) // Sort by newest first
+    .skip(skip)
+    .limit(limitNumber);
+
+  // Get total count for pagination info
+  const totalTransactions = await Transaction.countDocuments(query);
+  const totalPages = Math.ceil(totalTransactions / limitNumber);
+
+  return apiResponse(
+    res,
+    200,
+    {
+      transactions,
+      pagination: {
+        total: totalTransactions,
+        page: pageNumber,
+        limit: limitNumber,
+        totalPages,
+        hasNextPage: pageNumber < totalPages,
+        hasPrevPage: pageNumber > 1,
+      },
+    },
+    "Transactions fetched successfully"
+  );
+  // Send the response
 });

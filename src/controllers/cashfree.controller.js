@@ -22,7 +22,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     throw new apiError(400, "Invalid amount");
   }
   try {
-    const order_id = `order_${crypto.randomBytes(10).toString("hex")}`;
+    const order_id = `${crypto.randomBytes(10).toString("hex")}`;
 
     const payload = {
       order_currency: "INR",
@@ -131,7 +131,6 @@ export const webhookVerification = asyncHandler(async (req, res) => {
     if (!updatedOrder) {
       // If updatedOrder is null, it means the order was either not found or was
       // already processed. In a webhook, it's safer to assume the latter.
-      console.log("Webhook already processed or order not found for:", orderId);
       return res.status(200).send("Already processed or not found");
     }
 

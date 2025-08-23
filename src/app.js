@@ -21,11 +21,7 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: [
-      "https://team04.site",
-      "https://www.team04.site",
-      "http://localhost:3000",
-    ],
+    origin: ["https://team04.site", "https://www.team04.site"],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true,
   })

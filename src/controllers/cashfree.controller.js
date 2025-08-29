@@ -15,7 +15,7 @@ export const createOrder = asyncHandler(async (req, res) => {
   if (!_id) throw new apiError(400, "user not authorized please login");
 
   if (!phone || !email) {
-    throw new apiError(400, "Phone and email are required");
+    throw new apiError(400, "Phone are required edit your profile .");
   }
 
   if (!amount || amount <= 0) {

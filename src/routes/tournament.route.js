@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { isAdmin, verifyJWT } from "../middlewares/auth.middleware.js";
 import {
   createTournament,
   getHomePageTournaments,
@@ -12,7 +12,7 @@ import {
 } from "../controllers/register.controller.js";
 const tournamentRoute = Router();
 
-tournamentRoute.route("/create").post(verifyJWT, createTournament);
+tournamentRoute.route("/create").post(verifyJWT,isAdmin, createTournament);
 tournamentRoute.route("/get").get(verifyJWT, getHomePageTournaments);
 tournamentRoute.route("/get-my-tournaments").get(verifyJWT, getMyTournaments);
 

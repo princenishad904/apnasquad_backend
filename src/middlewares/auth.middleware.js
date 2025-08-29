@@ -43,3 +43,16 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
     throw new apiError(401, error?.message || "Invalid access token.");
   }
 });
+
+
+
+export const isAdmin = asyncHandler(async(req, _, next) => {
+    const user = req.user;
+    if (!user) {
+        throw new apiError(401, "User not authenticated. Please verify JWT first.");
+    }
+    if (user.role !== 'admin') {
+        throw new apiError(403, "Invalid request.");
+    }
+    next();
+});

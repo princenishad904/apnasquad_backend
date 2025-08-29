@@ -168,12 +168,11 @@ export const updateWithdrawStatus = asyncHandler(async (req, res) => {
   }
 
   // Agar status 'success' hai, to user ka balance update karein
-  if (status === "success") {
+ if (status === "success") {
     // Yehi sabse critical part hai
-    const updatedUser = await User.findOneAndUpdate(
-      { _id: withdraw.userId._id, balance: { $gte: withdraw.amount } },
-      { $inc: { balance: -withdraw.amount } },
-      { new: true }
+    const updatedUser = await Transaction.findOneAndUpdate(
+         { transactionId },
+         { $set: { status: status } }
     );
 
     if (!updatedUser) {
@@ -184,10 +183,10 @@ export const updateWithdrawStatus = asyncHandler(async (req, res) => {
       );
       throw new apiError(
         400,
-        "Insufficient balance or failed to update user balance"
+        "Failed to find transaction"
       );
     }
-  }
+}
 
   // Sabhi cases ke liye withdrawal status ko update karein
   const updatedWithdrawal = await Withdrawal.findOneAndUpdate(
